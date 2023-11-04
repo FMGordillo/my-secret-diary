@@ -1,28 +1,65 @@
+// FIXME: Should this be here?
+declare global {
+  interface Window {
+    ethereum: any
+  }
+}
+
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
-import type { PropsWithChildren } from "react";
+import Link from "next/link";
+import { useEffect, type PropsWithChildren } from "react";
 
 type LayoutProps = PropsWithChildren;
 
 export default function Layout({ children }: LayoutProps) {
   const { data: sessionData } = useSession();
+
+  const handleAccountsChanged = (accounts: unknown[]) => {
+    console.log('acount changed', accounts);
+    if (accounts.length === 0) {
+      // TODO: maybe notify the user that their wallet is not connected
+      signOut();
+    }
+  }
+
+  useEffect(() => {
+    const tryThis = async () => {
+      try {
+        window.ethereum.on('accountsChanged', handleAccountsChanged);
+      } catch (error) {
+        console.error(error)
+      }
+    }
+    tryThis()
+
+    return () => {
+      if (window && window.ethereum) {
+        window.ethereum.removeListener('accountsChanged', handleAccountsChanged)
+      }
+    }
+
+  }, [sessionData]);
+
   return (
     <>
       <Head>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <header className="bg-red-900">
-        <div className="container mx-auto flex items-center justify-between py-2">
-          <span className="text-xl">Your secret diary</span>
-          <button
-            className="btn"
-            onClick={sessionData ? () => void signOut() : () => void signIn()}
-          >
-            {sessionData ? "sign out" : "sign in"}
-          </button>
-        </div>
-      </header>
-      <main>{children}</main>
+      <div className="flex flex-col h-full">
+        <header className="bg-primary/70">
+          <div className="container mx-auto flex items-center justify-between p-2">
+            <Link href="/app"><span className="text-xl">Your secret diary</span></Link>
+            <button
+              className={`btn ${sessionData ? 'animate-none' : 'motion-safe:animate-bounce'}`}
+              onClick={sessionData ? () => void signOut() : () => void signIn()}
+            >
+              {sessionData ? "sign out" : "sign in"}
+            </button>
+          </div>
+        </header>
+        <main className="h-full">{children}</main>
+      </div>
     </>
   );
 }

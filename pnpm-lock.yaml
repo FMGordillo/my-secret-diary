@@ -41,6 +41,12 @@ dependencies:
   drizzle-orm:
     specifier: ^0.28.5
     version: 0.28.6(@libsql/client@0.3.6)(@planetscale/database@1.11.0)(better-sqlite3@9.0.0)(mysql2@3.6.2)
+  ethers:
+    specifier: 6.8.1
+    version: 6.8.1
+  geist:
+    specifier: 1.0.0
+    version: 1.0.0
   next:
     specifier: ^13.5.4
     version: 13.5.6(react-dom@18.2.0)(react@18.2.0)
@@ -55,7 +61,7 @@ dependencies:
     version: 18.2.0(react@18.2.0)
   siwe:
     specifier: ^2.1.4
-    version: 2.1.4(ethers@6.8.0)
+    version: 2.1.4(ethers@6.8.1)
   superjson:
     specifier: ^1.13.1
     version: 1.13.3
@@ -707,6 +713,10 @@ packages:
     dependencies:
       glob: 7.1.7
     dev: true
+
+  /@next/font@13.5.6:
+    resolution: {integrity: sha512-urmUq05uCVJsBqAAJEV+xK5OTTodrSxdiG+351SOSjlWctywdBM6qX+K9pIe3K48RxjfnxlBbXjGyOJAji+pfw==}
+    dev: false
 
   /@next/swc-darwin-arm64@13.5.6:
     resolution: {integrity: sha512-5nvXMzKtZfvcu4BhtV0KH1oGv4XEW+B+jOfmBdpFI3C7FrB/MfujRpWYSBBO64+qbW8pkZiSyQv9eiwnn5VIQA==}
@@ -3190,8 +3200,8 @@ packages:
       fast-safe-stringify: 2.1.1
     dev: false
 
-  /ethers@6.8.0:
-    resolution: {integrity: sha512-zrFbmQRlraM+cU5mE4CZTLBurZTs2gdp2ld0nG/f3ecBK+x6lZ69KSxBqZ4NjclxwfTxl5LeNufcBbMsTdY53Q==}
+  /ethers@6.8.1:
+    resolution: {integrity: sha512-iEKm6zox5h1lDn6scuRWdIdFJUCGg3+/aQWu0F4K0GVyEZiktFkqrJbRjTn1FlYEPz7RKA707D6g5Kdk6j7Ljg==}
     engines: {node: '>=14.0.0'}
     dependencies:
       '@adraffy/ens-normalize': 1.10.0
@@ -3393,6 +3403,12 @@ packages:
   /functions-have-names@1.2.3:
     resolution: {integrity: sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==}
     dev: true
+
+  /geist@1.0.0:
+    resolution: {integrity: sha512-7hqXZqIdSiFbXjlMZ8Ag0fBAW8RzUjIXPkh160rT4m4ECMtsKdFX+06e0mK28oRCpU+lOB1C5Es8qxzvv7H2Hg==}
+    dependencies:
+      '@next/font': 13.5.6
+    dev: false
 
   /generate-function@2.3.1:
     resolution: {integrity: sha512-eeB5GfMNeevm/GRYq20ShmsaGcmI81kIX2K9XQx5miC8KdHaC6Jm0qQ8ZNeGOi7wYB8OsdxKs+Y2oVuTFuVwKQ==}
@@ -5112,14 +5128,14 @@ packages:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
     dev: true
 
-  /siwe@2.1.4(ethers@6.8.0):
+  /siwe@2.1.4(ethers@6.8.1):
     resolution: {integrity: sha512-Dke1Qqa3mgiLm3vjqw/+SQ7dl8WV/Pfk3AlQBF94cBFydTYhztngqYrikzE3X5UTsJ6565dfVbQptszsuYZNYg==}
     peerDependencies:
       ethers: ^5.6.8 || ^6.0.8
     dependencies:
       '@spruceid/siwe-parser': 2.0.2
       '@stablelib/random': 1.0.2
-      ethers: 6.8.0
+      ethers: 6.8.1
       uri-js: 4.4.1
       valid-url: 1.0.9
     dev: false

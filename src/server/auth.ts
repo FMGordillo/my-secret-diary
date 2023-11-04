@@ -3,6 +3,7 @@ import {
   getServerSession,
   type DefaultSession,
   type NextAuthOptions,
+  User,
 } from "next-auth";
 import { env } from "~/env.mjs";
 import { db } from "~/server/db";
@@ -11,35 +12,22 @@ import { SQLiteDrizzleAdapter } from "./drizzleSqliteAdapter";
 // import { getCsrfToken } from "next-auth/react"
 import { SiweMessage } from "siwe";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { users } from "./db/schema";
 
-/**
- * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
- * object and keep type safety.
- *
- * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
- */
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      // ...other properties
-      // role: UserRole;
+      ethAddress: string | null;
     } & DefaultSession["user"];
   }
 
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
+  interface User {
+    ethAddress: string | null;
+  }
 }
 
-/**
- * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
- *
- * @see https://next-auth.js.org/configuration/options
- */
 export const authOptions: NextAuthOptions = {
   debug: true,
   pages: {
@@ -49,15 +37,15 @@ export const authOptions: NextAuthOptions = {
     // verifyRequest: "/verify-request",
   },
   callbacks: {
-    async redirect({ url, baseUrl }) {
-      console.log('redirect', { url, baseUrl });
-      return baseUrl
+    async jwt({ token, user }) {
+      if (user) {
+        token.ethAddress = user.ethAddress;
+      }
+      return token;
     },
-    async session({ session, token }: { session: any; token: any }) {
-      console.log({ session, token });
-      // session.address = token.sub;
-      session.user.id = token.sub;
-      // session.user.image = "https://www.fillmurray.com/128/128";
+    async session({ session, token }) {
+      session.user.ethAddress = token.ethAddress as string | null;
+      session.user.id = token.sub ?? "";
       return session;
     },
   },
@@ -99,30 +87,30 @@ export const authOptions: NextAuthOptions = {
             // nonce,
           });
 
-          console.log("yay", siwe);
-          console.log({ result });
-
           if (result.success) {
-            // Should I persist this somewhere?
+            const currentUser = await db
+              .select()
+              .from(users)
+              .where(eq(users.ethAddress, siwe.address))
+              .get();
 
-            const currentUser = await db.run(
-              sql`SELECT * FROM ${users} WHERE ethAddress = ${siwe.address}`,
-            );
-
-            if (currentUser.rows.length > 0) {
-              console.log(currentUser.rows[0])
-              return currentUser.rows[0];
+            if (currentUser) {
+              return currentUser;
             } else {
-              const createdUser = await db.run(
-                sql`INSERT INTO ${users} (ethAddress) VALUES (${siwe.address})`,
-              );
-              console.log(createdUser.rows[0])
-              return createdUser.rows[0];
+              return db
+                .insert(users)
+                .values({
+                  ethAddress: siwe.address,
+                })
+                .returning()
+                .get();
             }
           }
+
           return null;
         } catch (e) {
           console.log(e);
+
           return null;
         }
       },

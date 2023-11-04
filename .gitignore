@@ -40,3 +40,9 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+my.db
+
+.env*
+.flaskenv*
+!.env.project
+!.env.vault

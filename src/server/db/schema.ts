@@ -23,9 +23,9 @@ export const users = sqliteTable("user", {
 
 export const diaries = sqliteTable("diary", {
   id: text("id").notNull().primaryKey().$defaultFn(createId),
-  title: text("title"),
+  title: text("title").default("New entry"),
   content: text("content"),
-  createdAt: integer("text", { mode: "timestamp_ms" }),
+  createdAt: integer("createdAt", { mode: "timestamp_ms" }),
   userId: text("userId")
     .notNull()
     .references(() => users.id, { onDelete: "set null" }),

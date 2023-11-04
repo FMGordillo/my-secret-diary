@@ -1,13 +1,13 @@
 import { and, eq } from "drizzle-orm";
 import {
-  BaseSQLiteDatabase,
-  SQLiteTableFn,
+  type BaseSQLiteDatabase,
+  type SQLiteTableFn,
   integer,
   primaryKey,
   sqliteTable,
   text,
 } from "drizzle-orm/sqlite-core";
-import { Adapter, AdapterAccount } from "next-auth/adapters";
+import type { Adapter, AdapterAccount } from "next-auth/adapters";
 
 export function createTables(sqliteTable: SQLiteTableFn) {
   const users = sqliteTable("user", {
