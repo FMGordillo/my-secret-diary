@@ -86,7 +86,6 @@ export const authOptions: NextAuthOptions = {
           );
 
           const siwe = new SiweMessage(siweMessage);
-          const nextAuthUrl = new URL(env.NEXTAUTH_URL);
 
           // I think nonce only works without localhost
           // const nonce = await getCsrfToken({ req })
@@ -94,7 +93,7 @@ export const authOptions: NextAuthOptions = {
 
           const result = await siwe.verify({
             signature: credentials?.signature ?? "",
-            domain: nextAuthUrl.host,
+            domain: env.NEXTAUTH_URL,
             // nonce,
           });
 
