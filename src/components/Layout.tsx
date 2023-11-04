@@ -61,11 +61,18 @@ export default function Layout({ children }: LayoutProps) {
               <span className="text-xl">Your secret diary</span>
             </Link>
             <button
-              className={`btn ${
-                sessionData ? "animate-none" : "motion-safe:animate-bounce"
-              }`}
+              className="btn"
               onClick={sessionData ? () => void signOut() : () => void signIn()}
             >
+              {!sessionData && (
+                <span
+                  className="animate-bounce-right"
+                  role="img"
+                  aria-label="finger pointing right"
+                >
+                  👉
+                </span>
+              )}
               {sessionData ? "sign out" : "sign in"}
             </button>
           </div>

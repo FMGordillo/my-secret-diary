@@ -6,7 +6,7 @@ export default {
   driver: "turso",
   dbCredentials: {
     url: env.DATABASE_URL,
-    // authToken: env.DATABASE_AUTH_TOKEN,
+    authToken: env.DATABASE_AUTH_TOKEN,
   },
   tablesFilter: ["my_secret_diary_*"],
 } satisfies Config;
