@@ -14,6 +14,7 @@ export function createTables(sqliteTable: SQLiteTableFn) {
     id: text("id").notNull().primaryKey(),
     name: text("name"),
     email: text("email").notNull(),
+    ethAddress: text("ethAddress"),
     emailVerified: integer("emailVerified", { mode: "timestamp_ms" }),
     image: text("image"),
   });

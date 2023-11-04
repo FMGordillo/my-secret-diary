@@ -2,9 +2,10 @@ import { getCsrfToken, signIn, useSession } from "next-auth/react";
 import { SiweMessage } from "siwe";
 import { useAccount, useConnect, useNetwork, useSignMessage } from "wagmi";
 import { InjectedConnector } from "wagmi/connectors/injected";
-import { ReactElement, useEffect } from "react";
+import { type ReactElement, useEffect } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
+import { type GetServerSideProps } from "next";
 
 export default function SignInPage() {
   const { signMessageAsync } = useSignMessage();
@@ -22,7 +23,8 @@ export default function SignInPage() {
       const message = new SiweMessage({
         domain: window.location.host,
         address: address,
-        statement: "(ChiroTech): Sign in with your Ethereum wallet, see how easy it is!",
+        statement:
+          "(ChiroTech): Sign in with your Ethereum wallet, see how easy it is!",
         uri: window.location.origin,
         version: "1",
         chainId: chain?.id,
@@ -33,7 +35,7 @@ export default function SignInPage() {
         message: message.prepareMessage(),
       });
 
-      signIn("ethereum-login", {
+      void signIn("ethereum-login", {
         message: JSON.stringify(message),
         redirect: false,
         signature,
@@ -46,22 +48,22 @@ export default function SignInPage() {
 
   useEffect(() => {
     if (isConnected && !session) {
-      handleLogin();
+      void handleLogin();
       return;
     }
 
     if (isConnected) {
-      router.replace("/app");
+      void router.replace("/app");
     }
   }, [router, session, isConnected]);
 
   return (
     <main className="container mx-auto flex h-screen items-center justify-center">
-      <div className="mockup-window bg-neutral-800 border border-base-300">
-        <div className="flex flex-col gap-4 justify-center border-t border-base-300 p-8">
+      <div className="mockup-window border border-base-300 bg-neutral-800">
+        <div className="flex flex-col justify-center gap-4 border-t border-base-300 p-8">
           <div>
-            <h1 className="font-bold text-xl">Select your login method</h1>
-            <p>Hint: There's only one logical option</p>
+            <h1 className="text-xl font-bold">Select your login method</h1>
+            <p>Hint: There{"&apos;"}s only one logical option</p>
           </div>
           <button
             className="btn btn-primary"
@@ -70,25 +72,25 @@ export default function SignInPage() {
               if (!isConnected) {
                 connect();
               } else {
-                handleLogin();
+                void handleLogin();
               }
             }}
           >
-            {isLoading && <img src="/loading.svg" className="w-6 motion-safe:animate-spin" alt="loading-image" />}
+            {isLoading && (
+              <img
+                src="/loading.svg"
+                className="w-6 motion-safe:animate-spin"
+                alt="loading-image"
+              />
+            )}
             Sign in with Ethereum
           </button>
 
-          <button
-            className="btn btn-primary"
-            disabled
-          >
+          <button className="btn btn-primary" disabled>
             Sign in with Google
           </button>
 
-          <button
-            className="btn"
-            disabled
-          >
+          <button className="btn" disabled>
             Sign in with Facebook
           </button>
         </div>
@@ -108,10 +110,10 @@ SignInPage.getLayout = function getLayout(page: ReactElement) {
   );
 };
 
-export async function getServerSideProps(context: any) {
+export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       csrfToken: await getCsrfToken(context),
     },
   };
-}
+};

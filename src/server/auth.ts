@@ -3,7 +3,6 @@ import {
   getServerSession,
   type DefaultSession,
   type NextAuthOptions,
-  User,
 } from "next-auth";
 import { env } from "~/env.mjs";
 import { db } from "~/server/db";
@@ -14,6 +13,8 @@ import { SiweMessage } from "siwe";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { eq } from "drizzle-orm";
 import { users } from "./db/schema";
+import { type BaseSQLiteDatabase } from "drizzle-orm/sqlite-core";
+import invariant from "tiny-invariant";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
@@ -37,13 +38,13 @@ export const authOptions: NextAuthOptions = {
     // verifyRequest: "/verify-request",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    jwt({ token, user }) {
       if (user) {
         token.ethAddress = user.ethAddress;
       }
       return token;
     },
-    async session({ session, token }) {
+    session({ session, token }) {
       session.user.ethAddress = token.ethAddress as string | null;
       session.user.id = token.sub ?? "";
       return session;
@@ -53,7 +54,10 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
-  adapter: SQLiteDrizzleAdapter(db, sqliteTable),
+  adapter: SQLiteDrizzleAdapter(
+    db as BaseSQLiteDatabase<"async", unknown>,
+    sqliteTable,
+  ),
   providers: [
     CredentialsProvider({
       id: "ethereum-login",
@@ -72,9 +76,16 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         try {
-          const siwe = new SiweMessage(
-            JSON.parse(credentials?.message || "{}"),
+          const siweMessage = JSON.parse(
+            credentials?.message ?? "{}",
+          ) as string;
+
+          invariant(
+            typeof siweMessage === "string",
+            "siweMessage should be a valid string",
           );
+
+          const siwe = new SiweMessage(siweMessage);
           const nextAuthUrl = new URL(env.NEXTAUTH_URL);
 
           // I think nonce only works without localhost
@@ -82,7 +93,7 @@ export const authOptions: NextAuthOptions = {
           // console.log('haber ese nons', nonce)
 
           const result = await siwe.verify({
-            signature: credentials?.signature || "",
+            signature: credentials?.signature ?? "",
             domain: nextAuthUrl.host,
             // nonce,
           });

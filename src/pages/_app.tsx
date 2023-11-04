@@ -18,7 +18,7 @@ const config = createConfig({
   }),
 });
 
-export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
+export type NextPageWithLayout<P = object, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
 };
 
@@ -82,11 +82,11 @@ function MyApp({
   Component,
   pageProps: { session, ...pageProps },
 }: AppPropsWithLayout) {
-  const getLayout = Component?.getLayout || ((page) => <Layout>{page}</Layout>);
+  const getLayout = Component?.getLayout ?? ((page) => <Layout>{page}</Layout>);
 
   return (
     <WagmiConfig config={config}>
-      <SessionProvider session={session}>
+      <SessionProvider session={session as Session}>
         <div className={`${geistFont.className} h-full`}>
           {getLayout(<Component {...pageProps} />)}
         </div>

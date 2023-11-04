@@ -1,7 +1,13 @@
 // FIXME: Should this be here?
 declare global {
   interface Window {
-    ethereum: any
+    ethereum: {
+      on: (event: string, callback: (accounts: unknown[]) => void) => void;
+      removeListener: (
+        event: string,
+        callback: (args: unknown[]) => void,
+      ) => void;
+    };
   }
 }
 
@@ -16,29 +22,31 @@ export default function Layout({ children }: LayoutProps) {
   const { data: sessionData } = useSession();
 
   const handleAccountsChanged = (accounts: unknown[]) => {
-    console.log('acount changed', accounts);
+    console.log("acount changed", accounts);
     if (accounts.length === 0) {
       // TODO: maybe notify the user that their wallet is not connected
-      signOut();
+      void signOut();
     }
-  }
+  };
 
   useEffect(() => {
-    const tryThis = async () => {
+    const tryThis = () => {
       try {
-        window.ethereum.on('accountsChanged', handleAccountsChanged);
+        window.ethereum.on("accountsChanged", handleAccountsChanged);
       } catch (error) {
-        console.error(error)
+        console.error(error);
       }
-    }
-    tryThis()
+    };
+    tryThis();
 
     return () => {
       if (window && window.ethereum) {
-        window.ethereum.removeListener('accountsChanged', handleAccountsChanged)
+        window.ethereum.removeListener(
+          "accountsChanged",
+          handleAccountsChanged,
+        );
       }
-    }
-
+    };
   }, [sessionData]);
 
   return (
@@ -46,12 +54,16 @@ export default function Layout({ children }: LayoutProps) {
       <Head>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div className="flex flex-col h-full">
+      <div className="flex h-full flex-col">
         <header className="bg-primary/70">
           <div className="container mx-auto flex items-center justify-between p-2">
-            <Link href="/app"><span className="text-xl">Your secret diary</span></Link>
+            <Link href="/app">
+              <span className="text-xl">Your secret diary</span>
+            </Link>
             <button
-              className={`btn ${sessionData ? 'animate-none' : 'motion-safe:animate-bounce'}`}
+              className={`btn ${
+                sessionData ? "animate-none" : "motion-safe:animate-bounce"
+              }`}
               onClick={sessionData ? () => void signOut() : () => void signIn()}
             >
               {sessionData ? "sign out" : "sign in"}
