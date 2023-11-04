@@ -78,11 +78,11 @@ export const authOptions: NextAuthOptions = {
         try {
           const siweMessage = JSON.parse(
             credentials?.message ?? "{}",
-          ) as string;
+          ) as object;
 
           invariant(
-            typeof siweMessage === "string",
-            "siweMessage should be a valid string",
+            typeof siweMessage === "object",
+            "siweMessage should be a valid object",
           );
 
           const siwe = new SiweMessage(siweMessage);
