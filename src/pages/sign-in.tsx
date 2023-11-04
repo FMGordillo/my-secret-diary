@@ -63,7 +63,7 @@ export default function SignInPage() {
         <div className="flex flex-col justify-center gap-4 border-t border-base-300 p-8">
           <div>
             <h1 className="text-xl font-bold">Select your login method</h1>
-            <p>Hint: There{"&apos;"}s only one logical option</p>
+            <p>Hint: There&apos;s only one logical option</p>
           </div>
           <button
             className="btn btn-primary"
