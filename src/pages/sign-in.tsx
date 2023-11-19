@@ -21,7 +21,7 @@ export default function SignInPage() {
     try {
       const callbackUrl = "/";
       const message = new SiweMessage({
-        domain: window.location.host,
+        domain: window.location.origin,
         address: address,
         statement:
           "(ChiroTech): Sign in with your Ethereum wallet, see how easy it is!",
@@ -113,7 +113,7 @@ SignInPage.getLayout = function getLayout(page: ReactElement) {
 export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
-      csrfToken: await getCsrfToken(context),
+      csrfToken: (await getCsrfToken(context)) ?? null,
     },
   };
 };

@@ -1,4 +1,8 @@
-import { type GetServerSideProps } from "next";
+import {
+  type NextPage,
+  type GetServerSideProps,
+  type InferGetServerSidePropsType,
+} from "next";
 import { getServerSession } from "next-auth";
 import Head from "next/head";
 import { type FormEvent } from "react";
@@ -8,9 +12,11 @@ import { api } from "~/utils/api";
 
 const sectionContainer = "rounded-lg bg-gray-800/50 p-8";
 
-export default function App() {
-  const { data: diaries, refetch } = api.diary.getDiary.useQuery();
+const AppPage: NextPage<
+  InferGetServerSidePropsType<typeof getServerSideProps>
+> = ({ user = {} }) => {
   const mutation = api.diary.createDiary.useMutation();
+  const { data: diaries, refetch } = api.diary.getDiary.useQuery();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     try {
@@ -48,6 +54,27 @@ export default function App() {
       </Head>
 
       <div className="container mx-auto flex flex-col">
+        <details className={`${sectionContainer} duration-300`}>
+          <summary className="text-2xl hover:cursor-pointer">Your data</summary>
+
+          <div className="mt-8 grid grid-cols-1 items-center gap-4 md:grid-cols-2">
+            <pre className="overflow-hidden overflow-ellipsis font-mono">
+              {JSON.stringify(user, null, 2)}
+            </pre>
+            <div className="max-w-prose">
+              <p>
+                An ID is being generated for each user to be independant of the
+                wallet address that you might use. You can omit this and use
+                only the wallet address as ID
+              </p>
+              <br />
+              <p>
+                We are saving <b>only</b> your wallet address, and nothing more.
+              </p>
+            </div>
+          </div>
+        </details>
+
         <section className={sectionContainer}>
           <h2 className="mb-8 text-2xl">Create a new diary</h2>
           <form
@@ -97,18 +124,25 @@ export default function App() {
             {diaries?.map((diary) => (
               <div
                 key={diary.id?.toString()}
-                className="card mx-auto mb-8 max-w-md bg-base-100 shadow-xl"
+                className="grid grid-cols-1 gap-8 md:grid-cols-2"
               >
-                <div className="card-body flex flex-col gap-4">
-                  <h2 className="card-title">{diary.title?.toString()}</h2>
-                  <div className="leading bg-[repeating-linear-gradient(transparent,_transparent_1.55em,_#373737_1.55em,_#373737_1.6em)] bg-local">
-                    <p className="max-w-prose leading-relaxed ">
-                      {diary.content?.toString()}
+                <div className="card mb-8 max-w-md bg-base-100 shadow-xl">
+                  <div className="card-body flex flex-col gap-4">
+                    <h2 className="card-title">{diary.title?.toString()}</h2>
+                    <div className="leading bg-[repeating-linear-gradient(transparent,_transparent_1.55em,_#373737_1.55em,_#373737_1.6em)] bg-local">
+                      <p className="max-w-prose leading-relaxed ">
+                        {diary.content?.toString()}
+                      </p>
+                    </div>
+                    <p className="italic">
+                      Created at {diary.createdAt?.toLocaleString()}
                     </p>
                   </div>
-                  <p className="italic">
-                    Created at {diary.createdAt?.toLocaleString()}
-                  </p>
+                </div>
+                <div className="max-w-md">
+                  <pre className="font-mono">
+                    {JSON.stringify({ ...diary }, null, 2)}
+                  </pre>
                 </div>
               </div>
             ))}
@@ -117,7 +151,7 @@ export default function App() {
       </div>
     </>
   );
-}
+};
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getServerSession(context.req, context.res, authOptions);
@@ -133,7 +167,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   return {
     props: {
-      session,
+      user: session.user,
     },
   };
 };
+
+export default AppPage;
