@@ -2,12 +2,13 @@ import { getCsrfToken, signIn, useSession } from "next-auth/react";
 import { SiweMessage } from "siwe";
 import { useAccount, useConnect, useNetwork, useSignMessage } from "wagmi";
 import { InjectedConnector } from "wagmi/connectors/injected";
-import { type ReactElement, useEffect } from "react";
+import { type ReactElement, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import { type GetServerSideProps } from "next";
 
 export default function SignInPage() {
+  const modalRef = useRef<HTMLDialogElement>(null);
   const { signMessageAsync } = useSignMessage();
   const { chain } = useNetwork();
   const { address, isConnected } = useAccount();
@@ -46,6 +47,12 @@ export default function SignInPage() {
     }
   };
 
+  const showModal = () => {
+    if (modalRef) {
+      modalRef.current?.showModal();
+    }
+  };
+
   useEffect(() => {
     if (isConnected && !session) {
       void handleLogin();
@@ -71,6 +78,7 @@ export default function SignInPage() {
               e.preventDefault();
               if (!isConnected) {
                 connect();
+                showModal();
               } else {
                 void handleLogin();
               }
@@ -95,6 +103,46 @@ export default function SignInPage() {
           </button>
         </div>
       </div>
+
+      <dialog ref={modalRef} id="message_modal" className="modal">
+        <div className="modal-box">
+          <form method="dialog">
+            <button className="btn btn-circle btn-ghost btn-sm absolute right-2 top-2">
+              ✕
+            </button>
+          </form>
+          <h3 className="text-lg font-bold">Sign the message sent to you</h3>
+
+          <p className="my-4">
+            You should see in Metamask something similar to the message below:
+          </p>
+
+          <pre className="max-w-prose whitespace-pre-line bg-[#24272a] p-4">
+            http://localhost:3000 wants you to sign in with your Ethereum
+            account:
+            <br />
+            0x...
+            <br />
+            <br />
+            (ChiroTech): Sign in with your Ethereum wallet, see how easy it is!
+            <br />
+            <br />
+            URI: http://localhost:3000
+            <br />
+            Version: 1
+            <br />
+            Chain ID: 5
+            <br />
+            Nonce: ...
+            <br />
+            Issued At: {new Date().toDateString()}
+          </pre>
+
+          <p className="mt-4">
+            Please <b>confirm</b> the message and you will be signed in
+          </p>
+        </div>
+      </dialog>
     </main>
   );
 }
